@@ -27,7 +27,7 @@ func newMuxRouter() *MuxRouter {
 	return mux
 }
 
-func (mx *MuxRouter) HandleFunc(pattern string, handler http.HandlerFunc) {
+func (mx *MuxRouter) HFunc(pattern string, handler http.HandlerFunc) {
 	parts := strings.SplitN(pattern, " ", 2)
 
 	if len(parts) != 2 || parts[1][0] != '/' {
@@ -49,7 +49,7 @@ func (mx *MuxRouter) HandleFunc(pattern string, handler http.HandlerFunc) {
 	mx.tree.Insert(parts[1], parts[0], h)
 }
 
-func (mx *MuxRouter) With(middlewares ...func(http.Handler) http.Handler) Router {
+func (mx *MuxRouter) M(middlewares ...func(http.Handler) http.Handler) Router {
 	if !mx.inline && mx.handler == nil {
 		mx.updateRouteHandler()
 	}
@@ -117,12 +117,12 @@ func (mx *MuxRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	NewLogger().Info(msg)
 }
 
-func (mx *MuxRouter) Use(middlewares ...func(http.Handler) http.Handler) {
+func (mx *MuxRouter) U(middlewares ...func(http.Handler) http.Handler) {
 	mx.middlewares = append(mx.middlewares, middlewares...)
 }
 
 func (mx *MuxRouter) Group(fn func(r Router)) Router {
-	im := mx.With()
+	im := mx.M()
 	if fn != nil {
 		fn(im)
 	}
