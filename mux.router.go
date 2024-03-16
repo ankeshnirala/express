@@ -110,11 +110,17 @@ func (mx *MuxRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	handler.ServeHTTP(capturer, r)
 
 	duration := time.Since(start)
-	ms := duration.Milliseconds()
 
-	msg := fmt.Sprintf("%v | %dms | %s | %s | %s", capturer.status, ms, strings.SplitN(r.RemoteAddr, ":", 2)[0], r.Method, r.URL.Path)
+	msg := fmt.Sprintf("%v | %v | %s | %s | %s", capturer.status, formatResponseTime(duration), strings.SplitN(r.RemoteAddr, ":", 2)[0], r.Method, r.URL.Path)
 
 	NewLogger().Info(msg)
+}
+
+func formatResponseTime(duration time.Duration) string {
+	if duration < time.Millisecond {
+		return fmt.Sprintf("%.2fµs", float64(duration.Microseconds()))
+	}
+	return fmt.Sprintf("%.2fms", float64(duration.Milliseconds()))
 }
 
 func (mx *MuxRouter) U(middlewares ...func(http.Handler) http.Handler) {
